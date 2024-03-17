@@ -9,15 +9,20 @@ using std::ostream, std::string, std::string_view,
       std::cout, std::endl,
       std::pow, std::size;
 
+// Node<T> is the basic holder (T) data in Binary Tree System
 template <typename T>
 class Node
 {   
 private:
+    /* display perameters */
     string Middle;
     string start;
+
+    // data to store
     T _data_;
 
 public:
+    /* Node holding info */
     string BINCode;
     string name;
     Node* left;
@@ -42,6 +47,7 @@ virtual~Node()
     right = nullptr;
 };
 
+// Getters
 string hold_place() const
 {
     return start;
@@ -52,11 +58,12 @@ string arrow_point() const
     return Middle;
 }
 
-T& data()
+T& data()const
 {
     return _data_;
 }
 
+// Setters
 void arrow_point_to(string point)
 {
     Middle = point;
@@ -79,6 +86,20 @@ friend ostream& operator<<(ostream& out, Node& right)
     out << right.data();
     return out;
 }
+/* compare due to the distance from the root to current Node and its side (left or right)
+   left is considered as larger
+   example:-
+   001 > 000 (true)
+   011 < 100 (true) 
+   ----------------
+               <         root         >
+               /                      \
+           <    1      >         <     0      >
+           /           \         /            \
+        < 11  >      < 01  >    < 01  >      < 00  >
+        /     \      /     \    /     \      /     \
+      <111>  <110> <011> <010> <011> <010> <001>   <000>
+*/
 friend bool operator>(Node& left, Node& right)
 {
     return left.BINCode > right.BINCode;
@@ -95,6 +116,7 @@ friend bool operator<=(Node& left, Node& right)
 {
     return left.BINCode <= right.BINCode;
 }
+// equal means same
 friend bool operator==(Node& left, Node& right)
 {
     return (
@@ -106,6 +128,7 @@ friend bool operator==(Node& left, Node& right)
         );
 }
 
+/* display node struct */
 string build(const string cfiller, const int offset, bool by_name=false)
 {
     if (by_name)
@@ -144,6 +167,7 @@ typedef Node<int> NumaricalNode;
 typedef Node<bool> LogicalNode;
 typedef Node<string> ScriptNode;
 
+/* BinarayTree<T> represents the system which hold (T) data in dynamic Group */ 
 template <typename T>
 class BinaryTree
 {
@@ -151,13 +175,13 @@ private:
 const char LeftCode = '1';
 const char RightCode = '0';
 
-unsigned int header = 0;
+unsigned int header = 0; // point to last node number 
 string name = "Binary_Tree::=<default>";
 
 
 public:
-Group<Group<Node<T>>> rows;
-ScriptNode root = ScriptNode(name, "root");
+Group<Group<Node<T>>> rows; // all data will store here as row data
+ScriptNode root = ScriptNode(name, "root"); // the base of the tree is represented as the name of the tree
 
 
 BinaryTree(string root_data, string_view treename)
@@ -186,6 +210,7 @@ virtual~BinaryTree(){
     rows.~Group();
 };
 
+// Getters
 auto& last()
 {
     return rows[rows.length()-1][0];
@@ -215,7 +240,7 @@ auto& operator[](string __iterator_path)
     return *current_location;
 };
 
-
+/* @brief counts number of nodes from start level to end  */
 int sum(int start = 0, int end = -1)
 {
     int sum_of_levels = 0;
@@ -227,7 +252,7 @@ int sum(int start = 0, int end = -1)
     return sum_of_levels;
 }
 
-
+/* @brief return is the node is within th tree struct */
 bool is_connected(auto* target)
 {
     for(int i=0; i<rows; i++){
@@ -302,7 +327,7 @@ void append_node(auto* newNode)
     append_node(*newNode);
 }
 
-
+/* returns Point object with x: index in the row y: row index */
 Point<int, int> get_location(string path)
 {
     int level_eq = path.length();
@@ -323,6 +348,14 @@ Point<int, int> get_location(auto& node)
     return get_location(node.BINCode);
 }
 
+/*  @brief generate a diagram for the tree
+    @param frofill stands for outer style
+    @param infill stands for icons or nodes style
+    @param offset offset the tree by a particular value
+    @param by_name (true) node will been built as <(dynamic-space)name(dynamic-space)> 
+                   (false) node will been built as default <(dynamic-space)data(dynamic-space)> 
+    @param fix for set dynamic spaces
+*/  
 string get_diagram(const string frofill=" ", const string infill = " ", const int offset=20, bool by_name=false, bool fix=true)
 {
     string diagram;

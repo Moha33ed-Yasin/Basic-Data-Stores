@@ -118,11 +118,17 @@ virtual ~Group()
     delete[] Items; Items = nullptr;
 }
 
+/* 
+@breif check the object is avilable in the Group object
+@param element - the object to check
+@param Container - the Group to search in
+*/
 bool friend operator%(T& element, Group& Container)
 {
     int memory_location = (&element - &Container[0]);
     return (0 < memory_location && memory_location < Container.length());
 }
+
 bool friend operator==(Group first, Group second)
 {
 return (
@@ -132,6 +138,7 @@ return (
     );
 }
 
+// Getters
 T& operator[](int i)
 {
     expand_to(i + 1);
@@ -143,6 +150,7 @@ int length()const
     return End;
 }
 
+// Group items handlers
 void pop()
 {
     if(is_dynamic)
@@ -224,7 +232,9 @@ void remove_all(T& itemTotrash)
         }
     }
 }
-
+/*
+@breif if i > length() it will generate a new large Group to store (i) index 
+*/
 void expand_to(int __l)
 {
     if(__l > End && is_dynamic)
@@ -235,6 +245,7 @@ void expand_to(int __l)
     }
 }
 
+// find the item that same with
 int find(T& itemTofind)
 {
     if (itemTofind % (*this))
@@ -247,6 +258,11 @@ int find(T& itemTofind)
     return -1;
 }
 
+/*
+@breif find closest item in a Group due to another in main Group
+@param _from - refrence item to comapre with  
+@param _set - Group of items to comapre its distance with the refrence item 
+*/
 int find_closest(T& _from, Group _set)
 {
     const int _fromIndex(&_from - Items);
