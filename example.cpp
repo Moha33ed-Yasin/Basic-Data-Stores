@@ -40,7 +40,8 @@ int main()
     cout << "This diagram of BinaryTree represent the relationship of data-data:" << endl;
     cout << endl << endl;
     cout << tree.get_diagram("-", " ", 80, false) << endl;
-    cout << "The levels is as follow: " << endl << tree.rows << "        length of the list is:" << (tree.length()) << endl;
+    cout << "The levels is as follow: " << endl << tree.rows 
+    << "        length of the list is:" << (tree.length()) << endl;
 
     std::cout << "Ending Well..." << std::endl;
 

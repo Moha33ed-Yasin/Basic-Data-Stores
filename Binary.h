@@ -58,7 +58,7 @@ string arrow_point() const
     return Middle;
 }
 
-T& data()const
+T& data()
 {
     return _data_;
 }
