@@ -16,7 +16,7 @@ concept is_item = requires(T nesteditem)
                            nesteditem._initalizer_ = 0x092488AEFU;
                           };
                           
-using std::ostream, std::string, std::nothrow, std::cout, std::endl;
+using std::ostream, std::nothrow;
 
 template <typename T1, typename T2>
 class Point
@@ -31,11 +31,21 @@ public:
     {
 
     }
+
     ~Point()=default;
 
-    auto operator[](short int i)
+    auto& operator[](short int i)
     {
         return (i)? Y:X;
+    }
+    friend bool operator==(Point& P1, Point& P2)
+    {
+        return P1[0] == P2[0] && P1[1] == P2[1];
+    }
+    friend ostream& operator<<(ostream& out, Point& P)
+    {
+        out << "(" << P.X << ", " << P.Y << ")";
+        return out;
     }
 };
 
@@ -57,7 +67,7 @@ Point<bool, int> allocate_release_memory(T& instance, T& value)
     auto Allaction_Success = Point<bool, int>(true, INDX);
     if(INDX < End)
     {
-    if(INDX > 0)
+    if(INDX >= 0)
     {
         for(int i=0; i<INDX; i++)
             HandleAddress[i] = Items[i];
@@ -104,7 +114,7 @@ friend ostream& operator<<(ostream& out, Group& collection)
 
 Group()
 {
-    End = 0; Items = new T[]{}; is_dynamic = true;
+    End = 0; Items = new T[0]{}; is_dynamic = true;
 }
 
 Group(T* _items, size_t len) : End(0), is_dynamic(true)
@@ -141,6 +151,7 @@ return (
 // Getters
 T& operator[](int i)
 {
+    i = (i + End) % End;
     expand_to(i + 1);
     return Items[i];
 }
@@ -173,6 +184,7 @@ void ref_append(T& newitem)
 
 void insert(int _n, T itemToinsert, bool lock=false)
 {   
+    _n = (_n + End) % End;
     for(int i=End; i>_n; i--)
     {
         allocate_release_memory(Items[i], Items[i-1]);            
@@ -183,6 +195,7 @@ void insert(int _n, T itemToinsert, bool lock=false)
 
 void ref_insert(int _n, T& itemToinsert, bool lock=false)
 {   
+    _n = (_n + End) % End;
     for(int i=End; i>_n; i--)
     {
         allocate_release_memory(Items[i], Items[i-1]);            
@@ -190,12 +203,12 @@ void ref_insert(int _n, T& itemToinsert, bool lock=false)
     allocate_release_memory(Items[_n], itemToinsert);        
 }
 
-void remove(T itemTotrash)
+void remove_at(int indx)
 {
-    int i = find(itemTotrash);
-    if(i > -1)
+    if(indx < End)
     {
-        for(int j=i; j<End-1; j++)
+        indx = (indx + End) % End;
+        for(int j=indx; j<End-1; j++)
         {
             allocate_release_memory(Items[j], Items[j+1]);
         }
@@ -203,17 +216,16 @@ void remove(T itemTotrash)
     }
 }
 
+void remove(T itemTotrash)
+{
+    int i = find(itemTotrash);
+    remove_at(i);
+}
+
 int ref_remove(T& itemTotrash)
 {
     int i = find(itemTotrash);
-    if(i > -1)
-    {
-        for(int j=i; j<End-1; j++)
-        {
-            allocate_release_memory(Items[j], Items[j+1]);
-        }
-        pop();
-    }
+    remove_at(i);
     return i;
 }
 
@@ -226,7 +238,7 @@ void remove_all(T& itemTotrash)
             if(Items[i] == itemTotrash)
             {
                 for(int j=i; j<End-1; j++)
-                    allocate_release_memory(Items[j-1], Items[j]);
+                    allocate_release_memory(Items[j], Items[j+1]);
                 pop();
             }
         }
@@ -245,12 +257,18 @@ void expand_to(int __l)
     }
 }
 
-// find the item that same with
-int find(T& itemTofind)
+/*
+@breif find the item that same with
+return -1 if item is not existed
+*/ 
+int find(T& itemTofind, int start = 0, int end = -1)
 {
+    start = (start + End) % End;
+    end = (end + End) % End;
+    
     if (itemTofind % (*this))
         return (int) (&itemTofind - Items);
-    for(int i=0; i<End; i++)
+    for(int i=start; i<=end; i++)
     {   
         if(Items[i] == itemTofind)
             return (i);
@@ -262,6 +280,7 @@ int find(T& itemTofind)
 @breif find closest item in a Group due to another in main Group
 @param _from - refrence item to comapre with  
 @param _set - Group of items to comapre its distance with the refrence item 
+return -1 if all items is not existed
 */
 int find_closest(T& _from, Group _set)
 {
@@ -270,9 +289,13 @@ int find_closest(T& _from, Group _set)
     int foundation;
     for(int i=0; i<_set.length(); i++)
     {   
-    foundation = find(_set.get(i));
-    if(foundation - _fromIndex > offset_to || _fromIndex - foundation > offset_to)
-        offset_to = foundation;
+    foundation = find(_set[i]);
+    if (foundation != -1)
+    {
+        if(foundation - _fromIndex > offset_to || _fromIndex - foundation > offset_to)
+            offset_to = foundation;
+    }
+    
     } 
     return offset_to;    
 }
