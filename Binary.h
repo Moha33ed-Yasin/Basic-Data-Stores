@@ -86,7 +86,8 @@ friend ostream& operator<<(ostream& out, Node& right)
     out << right.data();
     return out;
 }
-/* compare due to the distance from the root to current Node and its side (left or right)
+/* 
+compare due to the distance from the root to current Node and its side (left or right)
    left is considered as larger
    example:-
    001 > 000 (true)
